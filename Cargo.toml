@@ -1,0 +1,61 @@
+[package]
+name = "world-alchemist"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+glam = {workspace = true}
+i18n-embed = {workspace = true, features = [
+    "fluent-system",
+    "desktop-requester",
+] }
+i18n-embed-fl = {workspace = true}
+iced = {workspace = true}
+rust-embed = { workspace = true}
+
+[workspace]
+resolver = "3"
+members = []
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+authors = ["Vincent Roy <metakernel@outlook.com>"]
+repository = "https://github.com/metakernel/world-alchemist"
+rust-version = "1.90"
+
+
+[workspace.dependencies]
+iced = {version = "0.14.0", features = ["wgpu", "svg","image","canvas","markdown","lazy","thread-pool","sysinfo","sipper","linux-theme-detection","x11","wayland","tiny-skia","advanced"] }
+rust-embed = "8.9.0"
+i18n-embed = "0.16.0"
+i18n-embed-fl = "0.10.0"
+glam = "0.30.9"
+
+[workspace.lints.rust]
+rust_2018_idioms = { level = "deny", priority = -1 }
+missing_docs = "deny"
+unsafe_code = "deny"
+unused_results = "deny"
+
+[workspace.lints.clippy]
+type-complexity = "allow"
+map-entry = "allow"
+large-enum-variant = "allow"
+result_large_err = "allow"
+semicolon_if_nothing_returned = "deny"
+trivially-copy-pass-by-ref = "deny"
+default_trait_access = "deny"
+match-wildcard-for-single-variants = "deny"
+redundant-closure-for-method-calls = "deny"
+filter_map_next = "deny"
+manual_let_else = "deny"
+unused_async = "deny"
+from_over_into = "deny"
+needless_borrow = "deny"
+new_without_default = "deny"
+useless_conversion = "deny"
+
+[workspace.lints.rustdoc]
+broken_intra_doc_links = "forbid"

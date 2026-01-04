@@ -2,7 +2,6 @@
 *.pdb
 **/*.rs.bk
 debug/
-target/
 vendor/
 vendor.tar
 debian/*
@@ -12,3 +11,7 @@ debian/*
 !debian/install
 !debian/rules
 !debian/source
+
+# Added by cargo
+
+/target
