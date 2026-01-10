@@ -46,6 +46,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
 
 [[package]]
+name = "autocfg"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
+
+[[package]]
 name = "blake3"
 version = "1.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -179,6 +185,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "num-traits"
+version = "0.2.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "071dfc062690e90b734c0b2273ce72ad0ffa95f0c74596bc250dcfd960262841"
+dependencies = [
+ "autocfg",
 ]
 
 [[package]]
@@ -453,12 +468,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f17a85883d4e6d00e8a97c586de764dabcc06133f7f1d55dce5cdc070ad7fe59"
 
 [[package]]
+name = "wmms-aspects"
+version = "0.1.0"
+dependencies = [
+ "miette",
+ "thiserror",
+ "wmms-core",
+]
+
+[[package]]
 name = "wmms-core"
 version = "0.1.0"
 dependencies = [
  "anyhow",
  "blake3",
  "miette",
+ "num-traits",
  "rand",
  "rand_chacha",
  "thiserror",
@@ -486,10 +511,6 @@ version = "0.1.0"
 
 [[package]]
 name = "wmms-toolings"
-version = "0.1.0"
-
-[[package]]
-name = "wmmsf-aspects"
 version = "0.1.0"
 
 [[package]]
