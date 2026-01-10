@@ -13,7 +13,7 @@ This is where the idea of **World Alchemist** was born. Creating a tool that wou
 
 ## What is World Alchemist ?
 
-World Alchemist is the most powerful Design-First gave development tool ever created, it is developped using the Rust programming language so that it offers performance and compatibility with the C ABI for eventual integration with game engines and other languages. It brings together worldbuilding, narrative design, game design and prototyping into your terminal through its `world` command line tool offering a powerful REPL scripting environment for the Alembscript DSL based on the MMS (for Model-Mechanic-Signal) framework so that you can transform your ideas into fully fledged game worlds.C
+World Alchemist is the most powerful Design-First game development and world building tool ever created, it is developped using the Rust programming language so that it offers performance and compatibility with the C ABI for eventual integration with game engines and other languages. It brings together worldbuilding, narrative design, game design and prototyping into your terminal through its `world` command line tool offering a powerful REPL scripting environment for the Alembscript DSL based on the MMS (for Model-Mechanic-Signal) framework so that you can transform your ideas into fully fledged game worlds.C
 
 ## Features
 
