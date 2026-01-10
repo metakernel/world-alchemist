@@ -1,8 +1,11 @@
 [package]
-name = "wmmsf-aspects"
+name = "wmms-aspects"
 edition.workspace = true
 version.workspace = true
 authors.workspace = true
 license.workspace = true
 
 [dependencies]
+wmms-core = {workspace = true}
+thiserror = {workspace = true}
+miette = {workspace = true}
