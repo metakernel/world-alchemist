@@ -1,0 +1,10 @@
+[package]
+name = "alembscript-compiler"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+alembscript-syntax = { workspace = true }
+wmms-core = { workspace = true }

@@ -1,0 +1,11 @@
+[package]
+name = "alembscript-syntax"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+miette = "7.6.0"
+pest = "2.8.5"
+thiserror = "2.0.17"

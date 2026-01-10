@@ -1,0 +1,10 @@
+[package]
+name = "world-universe"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+walkdir = "2.5.0"
