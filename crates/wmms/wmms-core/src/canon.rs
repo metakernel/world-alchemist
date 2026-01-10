@@ -1,6 +1,6 @@
 use crate::error::{Result, WMMSCoreError};
 
-#[derive(Clone,PartialEq,Eq,PartialOrd,Ord,Hash)]
+#[derive(Clone,PartialEq,Eq,PartialOrd,Ord,Hash,Debug)]
 pub struct CanonicalKey(String);
 
 impl CanonicalKey {
@@ -22,13 +22,27 @@ impl CanonicalKey {
         }
 
         // Convert file layout to dottet namespace
-        s = s.replace("/", ".");
+        s = s.trim_matches('/').to_string();
 
         if s.is_empty() {
             return Err(WMMSCoreError::InvalidPath(input.to_string()));
         }
 
         Ok(CanonicalKey(s))
+    }
+
+    pub fn from_dotted_ident(input: &str) -> Result<Self> {
+        let s = input.trim();
+        if s.is_empty() {
+            return Err(WMMSCoreError::InvalidPath(input.to_string()));
+        }
+
+        let parts: Vec<&str> = s.split('.').collect();
+        if parts.iter().any(|p| p.is_empty()) {
+            return Err(WMMSCoreError::InvalidPath(input.to_string()));
+        }
+
+        Ok(CanonicalKey(parts.join(".")))
     }
 }
 

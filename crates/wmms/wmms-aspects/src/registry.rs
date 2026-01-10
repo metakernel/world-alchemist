@@ -8,6 +8,7 @@ use wmms_core::prelude::*;
 use crate::error::{AspectError, AspectResult};
 use crate::path::{self, AspectPath};
 use crate::registry;
+use crate::set::AspectSet;
 
 #[repr(transparent)]
 #[derive(Clone,Copy,Debug,PartialEq,Eq,PartialOrd,Ord,Hash)]
@@ -17,7 +18,7 @@ pub struct AspectRid(pub u32);
 pub struct AspectNode{
     pub rid: AspectRid,
     pub id: AspectId,
-    pub path: String,
+    pub key: CanonicalKey,
     pub parent: Option<AspectRid>,
     pub children: Vec<AspectRid>,
     pub depth: u16,
@@ -25,20 +26,20 @@ pub struct AspectNode{
 
 pub struct AspectRegistry{
     nodes: Vec<AspectNode>,
-    by_path: BTreeMap<String, AspectRid>,
+    by_key: BTreeMap<CanonicalKey, AspectRid>,
     by_id: BTreeMap<AspectId, AspectRid>,
     pub registry_hash: Hash128,
 }
 
 pub struct AspectRegistryBuilder{
-    paths: BTreeMap<String, ()>,
+    keys: BTreeMap<CanonicalKey, ()>,
     sealed: bool,
 }
 
 impl AspectRegistryBuilder{
     pub fn new()->Self{
         Self{
-            paths: BTreeMap::new(),
+            keys: BTreeMap::new(),
             sealed: false,
         }
     }
@@ -54,10 +55,10 @@ impl AspectRegistryBuilder{
     }
 
     fn insert_with_ancestors(&mut self, canonical: &str) -> AspectResult<()> {
-        self.paths.entry(canonical.to_string()).or_insert(());
+        self.keys.entry(CanonicalKey::from_dotted_ident(canonical)?).or_insert(());
         let mut cur = AspectPath::parse(canonical)?;
         while let Some(parent) = cur.parent() {
-            self.paths.entry(parent.as_str().to_string()).or_insert(());
+            self.keys.entry(CanonicalKey::from_dotted_ident(parent.as_str())?).or_insert(());
             cur = parent;
         }
 
@@ -68,30 +69,30 @@ impl AspectRegistryBuilder{
         self.sealed = true;
 
         // Assign RIDs in canonical order by path (BTreeMap order)
-        let mut nodes: Vec<AspectNode> = Vec::with_capacity(self.paths.len());
-        let mut by_path: BTreeMap<String, AspectRid> = BTreeMap::new();
+        let mut nodes: Vec<AspectNode> = Vec::with_capacity(self.keys.len());
+        let mut by_key: BTreeMap<CanonicalKey, AspectRid> = BTreeMap::new();
         let mut by_id: BTreeMap<AspectId, AspectRid> = BTreeMap::new();
 
-        for(i, (path,_)) in self.paths.iter().enumerate() {
+        for(i, (key,_)) in self.keys.iter().enumerate() {
             let rid = AspectRid(i as u32);
-            let id = AspectId::derive(path); // Stable hash from canonical path
+            let id = AspectId::derive(key.as_str()); // Stable hash from canonical path
             nodes.push(AspectNode {
                 rid, id,
-                path: path.clone(),
+                key: key.clone(),
                 parent: None,
                 children: Vec::new(),
                 depth: 0,
             });
-            by_path.insert(path.clone(), rid);
+            by_key.insert(key.clone(), rid);
             by_id.insert(id, rid);
         }
 
         // Set up parent/child relationships and depths
         for idx in 0..nodes.len() {
-            let path = nodes[idx].path.clone();
-            let ap = AspectPath::parse(&path).map_err(|_| AspectError::InvalidPath(path.clone()))?;
+            let key = nodes[idx].key.clone();
+            let ap = AspectPath::parse(nodes[idx].key.as_str())?;
             if let Some(parent) = ap.parent(){
-                let parent_rid = *by_path.get(parent.as_str())
+                let parent_rid = *by_key.get(parent.key())
                 .ok_or_else(|| AspectError::UnknownAspect(parent.as_str().to_string()))?;
                 nodes[idx].parent = Some(parent_rid);
             }
@@ -124,17 +125,17 @@ impl AspectRegistryBuilder{
         // registry hash
         let mut acc = String::new();
         for n in &nodes {
-            acc.push_str(&n.path);
+            acc.push_str(&n.key.as_str());
             acc.push('|');
             if let Some(p) = n.parent {
-                acc.push_str(&nodes[p.0 as usize].path);
+                acc.push_str(&nodes[p.0 as usize].key.as_str());
             }
             acc.push('\n');
         }
         let registry_hash = hash_str128(&acc);
         Ok(AspectRegistry{
             nodes,
-            by_path,
+            by_key,
             by_id,
             registry_hash,
         })
@@ -150,7 +151,7 @@ impl AspectRegistry{
     }
     pub fn resolve_path(&self, path: &str) -> Option<AspectRid>{
         let p = AspectPath::parse(path).ok()?;
-        self.by_path.get(p.as_str()).copied()
+        self.by_key.get(p.key()).copied()
     }
     pub fn resolve_id(&self, id: &AspectId) -> Option<AspectRid>{
         self.by_id.get(id).copied()
@@ -158,8 +159,8 @@ impl AspectRegistry{
     pub fn node(&self, rid: AspectRid) -> &AspectNode{
         &self.nodes[rid.0 as usize]
     }
-    pub fn path(&self, rid: AspectRid) -> &str{
-        &self.nodes[rid.0 as usize].path
+    pub fn key(&self, rid: AspectRid) -> &CanonicalKey{
+        &self.nodes[rid.0 as usize].key
     }
     pub fn id(&self, rid: AspectRid) -> AspectId{
         self.nodes[rid.0 as usize].id
@@ -170,7 +171,7 @@ impl AspectRegistry{
     pub fn children(&self, rid: AspectRid) -> &[AspectRid]{
         &self.nodes[rid.0 as usize].children
     }
-    pub fn is_descendant(&self, mut rid: AspectRid, ancestor: AspectRid) -> bool{
+    pub fn is_descendant_of(&self, mut rid: AspectRid, ancestor: AspectRid) -> bool{
         while let Some(p) = self.parent(rid){
             if p == ancestor {
                 return true;
@@ -185,6 +186,22 @@ impl AspectRegistry{
             out.push(p);
             rid = p;
         }
+    }
+
+    pub fn close_under_ancestors(&self, base: &[AspectRid]) -> AspectSet {
+        let mut result = AspectSet::new();
+        for &rid in base {
+            result.insert(rid);
+            let mut current = rid;
+            while let Some(parent) = self.parent(current) {
+                if result.contains(parent) {
+                    break;
+                }
+                result.insert(parent);
+                current = parent;
+            }
+        }
+        result
     }
 
 }

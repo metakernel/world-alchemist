@@ -1,38 +1,30 @@
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
+use wmms_core::canon::CanonicalKey;
 
 use crate::error::{AspectError, AspectResult};
 
 #[derive(Clone,Debug,PartialEq,Eq,Hash, PartialOrd, Ord)]
-pub struct AspectPath(String);
+pub struct AspectPath(CanonicalKey);
 
 impl AspectPath {
     pub fn parse(input: &str) -> AspectResult<Self> {
-        let s = input.trim();
-        if s.is_empty() {
-            return Err(AspectError::InvalidPath(input.to_string()));
-        }
-
-        let parts: Vec<&str> = s.split('.').collect();
-        if parts.iter().any(|part| part.is_empty()) {
-            return Err(AspectError::InvalidPath(input.to_string()));
-        }
-
-        for p in &parts {
-            if !p.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {
-                return Err(AspectError::InvalidPath(input.to_string()));
-            }
-        }
-
-        Ok(AspectPath(parts.join(".")))
+        Ok(AspectPath(CanonicalKey::from_dotted_ident(input)?))
     }
 
     pub fn as_str(&self) -> &str {
+        self.0.as_str()
+    }
+
+    pub fn key(&self) -> &CanonicalKey {
         &self.0
     }
 
     pub fn parent(&self) -> Option<AspectPath> {
-        self.0.rfind('.').map(|idx| AspectPath(self.0[..idx].to_string()))
+        let s = self.as_str();
+        s.rfind('.').map(|i| {
+            AspectPath(CanonicalKey::from_dotted_ident(&s[..i]).expect("validated subset"))
+        })
     }
     
 }
