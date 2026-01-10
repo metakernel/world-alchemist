@@ -22,7 +22,7 @@ Here are some of the main features i am intending to implement first for **World
 - Discover Alembscript, a powerful scripting language based on the MMS (Model-Mechanic-Signal) framework to define your game mechanics, systems and interactions.
 - Use the Alembscript REPL in Authoring, Prototype or Query modes to build every aspect of your world brick by brick, interact with it or query its data.
 - Craft every aspect of your game world, from geography to cultures, histories, and ecosystems directly from the cli through interactive commands (Using Ratatui).
-- Human and version control friendly dataformat (TOML) to store and manage your world data while keeping them versionned alongside your game project.
+- Human and version control friendly dataformat based on the Alembscript DSL (.alemb) to store and manage your world data while keeping them versionned alongside your game project.
 - Build every facets of your game using World Alchemist's `WMMS`, an implementation of what i called the `Model-Mechanic-Signal (MMS)` framework.
 - Define the entities that populate your world, including characters, items, faction, cities, etc. through a powerful data-driven approach.
 - Design intricate narratives with branching storylines, character arcs, and dialogues.
