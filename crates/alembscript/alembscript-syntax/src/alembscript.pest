@@ -1,0 +1,397 @@
+// alembscript.pest
+//
+// Alembscript grammar
+// - Two entry rules:
+//     * asset_file  : Alembscript-Assets (declarative only)
+//     * repl_input  : Alembscript-REPL (ops + decls + meta)
+//
+// Notes:
+// - This grammar is designed to be used with a Pratt parser in Rust for expression precedence.
+// - Newlines are NOT treated as whitespace by default so the REPL can do multiline heuristics.
+// - Formatting/diffs friendliness is handled by an external formatter (alembfmt), not by the grammar.
+
+/////////////////////////////
+// LEXICAL / TRIVIA
+/////////////////////////////
+
+WHITESPACE = _{ " " | "\t" }
+NEWLINE    = _{ "\r\n" | "\n" }
+
+COMMENT = _{
+    line_comment
+  | hash_comment
+  | block_comment
+}
+
+line_comment = _{ "//" ~ (!NEWLINE ~ ANY)* }
+hash_comment = _{ "#"  ~ (!NEWLINE ~ ANY)* }
+block_comment = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
+
+ws   = _{ (WHITESPACE | COMMENT)* }
+wsnl = _{ (WHITESPACE | NEWLINE | COMMENT)* }
+
+stmt_end = _{ ws ~ ( ";" | NEWLINE+ ) ~ wsnl }
+
+/////////////////////////////
+// ENTRIES
+/////////////////////////////
+
+asset_file = { SOI ~ wsnl ~ asset_decl* ~ wsnl ~ EOI }
+repl_input = { SOI ~ wsnl ~ repl_stmt*  ~ wsnl ~ EOI }
+
+/////////////////////////////
+// TOP-LEVEL STATEMENTS
+/////////////////////////////
+
+repl_stmt = _{
+    meta_stmt
+  | asset_decl          // allowed in REPL (Authoring mode)
+  | let_stmt
+  | emit_stmt
+  | step_stmt
+  | advance_stmt
+  | query_stmt
+  | show_stmt
+  | explain_stmt
+  | trace_stmt
+} ~ (stmt_end)*
+
+/////////////////////////////
+// META (REPL) COMMANDS
+/////////////////////////////
+
+meta_stmt = _{
+    mode_cmd
+  | reload_cmd
+  | world_cmd
+  | session_cmd
+  | help_cmd
+  | quit_cmd
+  | lint_cmd
+  | fmt_cmd
+}
+
+mode_cmd   = { ":" ~ "mode" ~ ws ~ mode_name }
+mode_name  = { "auth" | "play" | "query" }
+
+reload_cmd = { ":" ~ "reload" }
+world_cmd  = { ":" ~ "world" }
+
+session_cmd = {
+  ":" ~ "session" ~ ws ~ (
+      "reset"
+    | ("save" ~ ws ~ ident)
+    | ("load" ~ ws ~ ident)
+  )
+}
+
+help_cmd = { ":" ~ "help" }
+quit_cmd = { ":" ~ ("quit" | "exit") }
+lint_cmd = { ":" ~ "lint" }
+fmt_cmd  = { ":" ~ "fmt" ~ (ws ~ path)? }
+
+/////////////////////////////
+// REPL OPS
+/////////////////////////////
+
+let_stmt = { "let" ~ ws ~ ident ~ ws ~ "=" ~ ws ~ expr }
+
+emit_stmt = { "emit" ~ ws ~ path ~ ws ~ object } // runtime op: emit a signal request/event template
+
+step_stmt = {
+  "step" ~ ws ~ (
+      int_lit
+    | ("until" ~ ws ~ "idle")
+  )
+}
+
+advance_stmt = { "advance" ~ ws ~ duration_lit }
+
+show_stmt = {
+  "show" ~ ws ~ (
+      ("entity" ~ ws ~ entity_ref)
+    | ("asset"  ~ ws ~ asset_ref)
+    | expr
+  )
+}
+
+explain_stmt = {
+  "explain" ~ ws ~ (
+      explain_attr
+    | explain_match
+    | explain_signal
+  )
+}
+
+explain_attr = { entity_ref ~ ws ~ ("attr" ~ "." ~ ident) }
+explain_match = { entity_ref ~ ws ~ "match" ~ ws ~ aspect_pred }
+explain_signal = { ("signal" ~ ws ~ ("#" ~ int_lit | "last_signal")) }
+
+trace_stmt = {
+  "trace" ~ ws ~ (
+      "last_signal"
+    | ("signal" ~ ws ~ "#" ~ int_lit)
+    | ("commit" ~ ws ~ "#" ~ int_lit)
+  )
+}
+
+/////////////////////////////
+// QUERY (REPL)
+/////////////////////////////
+
+query_stmt = {
+  "query" ~ ws ~ query_source ~ ws ~ query_tail
+}
+
+query_source = { "entities" | "traits" | "archetypes" | "abilities" | "effects" }
+
+query_tail = {
+  // keyword chain
+  (query_stage_kw ~ (ws ~ query_stage_kw)*)?
+  // optional pipe chain
+  ~ (wsnl ~ "|" ~ wsnl ~ query_stage_pipe)*
+}
+
+query_stage_kw = _{ where_stage | sort_stage | take_stage }
+query_stage_pipe = _{ where_stage | sort_stage | take_stage }
+
+where_stage = { "where" ~ ws ~ predicate }
+
+sort_stage = {
+  "sort" ~ ws ~ "by" ~ ws ~ sort_key ~ (ws ~ sort_dir)?
+}
+sort_key = { attr_ref | ident | path }
+sort_dir = { "asc" | "desc" }
+
+take_stage = { ("take" | "limit") ~ ws ~ int_lit }
+
+predicate = { predicate_atom ~ (ws ~ bool_op ~ ws ~ predicate_atom)* }
+bool_op = { "and" | "or" }
+
+predicate_atom = _{
+    aspect_pred
+  | attr_pred
+  | "(" ~ wsnl ~ predicate ~ wsnl ~ ")"
+}
+
+aspect_pred = { "aspects" ~ ws ~ aspect_query }
+
+aspect_query = {
+  ( "all_of" | "any_of" | "none_of" )
+  ~ ws ~ aspect_list
+}
+
+attr_pred = { attr_ref ~ ws ~ comp_op ~ ws ~ expr }
+attr_ref  = { ("attr" | "attrs") ~ "." ~ ident }
+
+comp_op = { "==" | "!=" | "<=" | ">=" | "<" | ">" }
+
+/////////////////////////////
+// ASSET DECLARATIONS (Assets dialect)
+/////////////////////////////
+
+asset_decl = _{
+    aspect_decl
+  | archetype_decl
+  | trait_decl
+  | entity_decl
+  | ability_decl
+  | effect_decl
+} ~ (stmt_end)*
+
+aspect_decl = {
+  "aspect" ~ ws ~ aspect_path ~ (ws ~ asset_block)?
+}
+
+archetype_decl = {
+  "archetype" ~ ws ~ type_path ~ ws ~ asset_block
+}
+
+trait_decl = {
+  "trait" ~ ws ~ type_path ~ ws ~ asset_block
+}
+
+entity_decl = {
+  "entity" ~ ws ~ canonical_path ~ ws ~ ":" ~ ws ~ type_path ~ ws ~ asset_block
+}
+
+ability_decl = {
+  "ability" ~ ws ~ type_path ~ ws ~ asset_block
+}
+
+effect_decl = {
+  "effect" ~ ws ~ type_path ~ ws ~ asset_block
+}
+
+/////////////////////////////
+// ASSET BLOCKS + SECTIONS
+/////////////////////////////
+
+asset_block = { "{" ~ wsnl ~ asset_item* ~ wsnl ~ "}" }
+
+asset_item = _{
+    id_stmt
+  | aspects_stmt
+  | traits_stmt
+  | grants_stmt
+  | bindings_stmt
+  | attributes_stmt
+  | relations_stmt
+  | stacking_stmt
+  | assign_stmt
+} ~ (stmt_end)*
+
+id_stmt = { "id" ~ ws ~ string_lit }
+
+aspects_stmt = { "aspects" ~ ws ~ aspect_list }
+
+traits_stmt = { "traits" ~ ws ~ trait_list }
+
+trait_list = {
+  "[" ~ wsnl ~ (trait_ref ~ (wsnl ~ ("," ~ wsnl)? ~ trait_ref)*)? ~ wsnl ~ "]"
+}
+trait_ref = { type_path ~ (ws ~ object)? } // allows parametric traits: TraitName { ... }
+
+grants_stmt = { "grants" ~ ws ~ grants_block }
+grants_block = { "{" ~ wsnl ~ grant_item* ~ wsnl ~ "}" }
+grant_item = _{
+    ("abilities" ~ ws ~ ref_list)
+  | ("effects"   ~ ws ~ ref_list)
+} ~ (stmt_end)*
+
+bindings_stmt = { "bindings" ~ ws ~ bindings_list }
+bindings_list = {
+  "[" ~ wsnl ~ (binding_decl ~ (wsnl ~ ("," ~ wsnl)? ~ binding_decl)*)? ~ wsnl ~ "]"
+}
+
+// Data-only binding (Assets dialect). This is NOT a runtime op.
+// Example: on signal.combat.crit -> emit TryActivateAbility { ... }
+binding_decl = {
+  "on" ~ ws ~ signal_match ~ ws ~ "->" ~ ws ~ emit_template
+}
+
+signal_match = {
+  path ~ (ws ~ "where" ~ ws ~ binding_condition)?
+}
+
+binding_condition = _{
+    aspect_pred
+  | predicate
+}
+
+emit_template = { "emit" ~ ws ~ path ~ ws ~ object }
+
+attributes_stmt = {
+  ("attributes" | "attrs") ~ ws ~ attr_block
+}
+
+attr_block = { "{" ~ wsnl ~ attr_entry* ~ wsnl ~ "}" }
+attr_entry = {
+  ident
+  ~ wsnl ~ ( ":" ~ wsnl ~ type_ref )?
+  ~ wsnl ~ ( attr_assign ~ wsnl )?
+  ~ (stmt_end)*
+}
+
+attr_assign = { attr_op ~ wsnl ~ expr }
+attr_op = { "=" | "+=" | "-=" | "*=" | ":=" }
+
+type_ref = { type_path ~ (wsnl ~ "<" ~ wsnl ~ type_ref ~ (wsnl ~ "," ~ wsnl ~ type_ref)* ~ wsnl ~ ">")? }
+
+relations_stmt = { "relations" ~ ws ~ relations_block }
+relations_block = { "{" ~ wsnl ~ relation_entry* ~ wsnl ~ "}" }
+relation_entry = { ident ~ wsnl ~ assign_op ~ wsnl ~ expr ~ (stmt_end)* }
+
+stacking_stmt = { "stacking" ~ ws ~ object } // leave policy details to compiler validation
+
+assign_stmt = { ident ~ ws ~ assign_op ~ ws ~ expr } // generic fields inside blocks
+assign_op   = { "=" | "+=" | "-=" }
+
+/////////////////////////////
+// EXPRESSIONS (shared)
+/////////////////////////////
+
+expr = _{ pratt_expr }
+
+// Pratt-friendly shape (precedence handled in Rust):
+// - prefix operators then atoms
+// - infix operators chained
+pratt_expr = {
+  prefix_op* ~ atom ~ (ws ~ infix_op ~ ws ~ prefix_op* ~ atom)*
+}
+
+prefix_op = _{ "!" | "-" }
+
+infix_op = _{
+    "||" | "&&"
+  | "or" | "and"
+  | "==" | "!=" | "<=" | ">=" | "<" | ">"
+  | "+"  | "-"  | "*"  | "/"
+}
+
+atom = _{
+    literal
+  | variable
+  | call
+  | path
+  | "(" ~ wsnl ~ expr ~ wsnl ~ ")"
+  | list
+  | object
+}
+
+literal = _{
+    ml_string_lit
+  | string_lit
+  | float_lit
+  | int_lit
+  | bool_lit
+  | null_lit
+}
+
+bool_lit = { "true" | "false" }
+null_lit = { "null" }
+
+variable = { "$" ~ ident } // e.g. $target, $source
+
+call = { ident ~ wsnl ~ "(" ~ wsnl ~ (arg_list)? ~ wsnl ~ ")" }
+arg_list = { expr ~ (wsnl ~ "," ~ wsnl ~ expr)* }
+
+list = { "[" ~ wsnl ~ (expr ~ (wsnl ~ ("," ~ wsnl)? ~ expr)*)? ~ wsnl ~ "]" }
+
+object = { "{" ~ wsnl ~ (object_entry ~ (wsnl ~ ("," ~ wsnl)? ~ object_entry)*)? ~ wsnl ~ "}" }
+object_entry = { (ident | string_lit) ~ wsnl ~ (":" | "=") ~ wsnl ~ expr }
+
+/////////////////////////////
+// REFERENCES
+/////////////////////////////
+
+entity_ref = { call | path | string_lit } // entity("x") or characters.alice
+asset_ref  = { call | path | string_lit } // trait("x") / ability("x") / path
+
+/////////////////////////////
+// IDENTIFIERS / PATHS
+/////////////////////////////
+
+ident = @{ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
+
+path = @{ ident ~ ("." ~ ident)* }
+canonical_path = @{ ident ~ ("." ~ ident)* } // same lexical shape; semantic differs (file-derived)
+type_path = @{ ident ~ ("." ~ ident)* }
+aspect_path = @{ ident ~ ("." ~ ident)* }
+
+/////////////////////////////
+// LITERALS
+/////////////////////////////
+
+int_lit = @{ "-"? ~ ASCII_DIGIT+ }
+float_lit = @{ "-"? ~ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ }
+
+string_lit = @{
+  "\"" ~ ( "\\\"" | "\\n" | "\\t" | "\\r" | "\\\\" | (!"\"" ~ ANY) )* ~ "\""
+}
+
+ml_string_lit = @{
+  "\"\"\"" ~ (!"\"\"\"" ~ ANY)* ~ "\"\"\""
+}
+
+duration_lit = @{ "-"? ~ ASCII_DIGIT+ ~ ( "ms" | "s" | "m" | "h" ) }
