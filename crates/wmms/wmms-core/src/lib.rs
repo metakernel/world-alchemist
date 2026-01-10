@@ -1,14 +1,13 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+pub mod error;
+pub mod hash;
+pub mod ids;
+pub mod canon;
+pub mod time;
+pub mod num;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+pub mod prelude {
+    pub use crate::error::{Result, WMMSCoreError};
+    pub use crate::ids::*;
+    pub use crate::canon::{CanonicalKey, CanonMap, CanonSet, canon_sort};
+    pub use crate::time::*;
 }

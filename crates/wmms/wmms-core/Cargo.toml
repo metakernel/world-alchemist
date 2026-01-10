@@ -6,3 +6,7 @@ authors.workspace = true
 license.workspace = true
 
 [dependencies]
+thiserror = {workspace = true}
+miette = {workspace = true}
+blake3 = {workspace = true}
+anyhow = {workspace = true}

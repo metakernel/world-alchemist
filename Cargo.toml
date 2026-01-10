@@ -47,4 +47,8 @@ alembscript-syntax = { path = "crates/alembscript/alembscript-syntax" }
 serde = { version = "1.0.228", features = ["derive"] }
 crossterm = "0.29.0"
 ratatui = "0.30.0"
+thiserror = "2.0.17"
+miette = "7.6.0"
+anyhow = "1.0.100"
+blake3 = "1.8.3"
 
