@@ -1,0 +1,32 @@
+[workspace]
+resolver = "3"
+members = ["crates/wmms/wmms-aspects", "crates/wmms/wmms-assets","crates/wmms/wmms-core", "crates/wmms/wmms-mechanics", "crates/wmms/wmms-model", "crates/wmms/wmms-runtime", "crates/wmms/wmms-signals", "crates/wmms/wmms-storage", "crates/wmms/wmms-toolings", "crates/world-cli"]
+
+[workspace.package]
+edition = "2024"
+version = "0.1.0"
+authors = ["Vincent Roy <metakernel@outlook.com>"]
+license = "AGPL-3.0-only"
+
+[workspace.dependencies]
+
+# World Alchemist crates
+world-cli = { path = "crates/world-cli" }
+
+# wmms crates
+wmms-core = { path = "crates/wmms-core" }
+wmms-runtime = { path = "crates/wmms-runtime" }
+wmms-signals = { path = "crates/wmms-signals" }
+wmms-storage = { path = "crates/wmms-storage" }
+wmms-toolings = { path = "crates/wmms-toolings" }
+wmms-model = { path = "crates/wmms-wmms-model" }
+wmms-mechanics = { path = "crates/wmms-wmms-mechanics" }
+wmms-aspects = { path = "crates/wmms-wmms-aspects" }
+wmms-assets = { path = "crates/wmms-wmms-assets" }
+
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+tokio = { version = "1.49.0", features = ["full"] }
+crossterm = "0.29.0"
+ratatui = "0.30.0"
+
