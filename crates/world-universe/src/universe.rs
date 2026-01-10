@@ -1,18 +1,34 @@
 
+use std::path::Path;
+
 use serde::{Deserialize, Serialize};
 
+use crate::world_root::WorldRoot;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Universe {
-    pub name: String,
+pub struct UniverseManifest {
+    pub world_name: String,
+    pub version: Option<String>,
     pub authors: Option<Vec<String>>,
+    pub default_scope: Option<String>,
 
 }
 
-impl Universe {
+impl UniverseManifest {
     pub fn new(name: &str, authors: Option<Vec<String>>) -> Self {
         Self {
-            name: name.to_string(),
+            world_name: name.to_string(),
+            version: None,
             authors,
+            default_scope: None,
         }
+    }
+    pub fn load(path: &WorldRoot) -> Result<Self, Box<dyn std::error::Error>> {
+        // Placeholder for loading logic
+        Ok(Self::new("DefaultUniverse", None))
+    }
+    pub fn save(&self, root: WorldRoot) -> Result<(), Box<dyn std::error::Error>> {
+        // Placeholder for saving logic
+        Ok(())
     }
 }
