@@ -10,3 +10,5 @@ thiserror = {workspace = true}
 miette = {workspace = true}
 blake3 = {workspace = true}
 anyhow = {workspace = true}
+rand = {workspace = true}
+rand_chacha = {workspace = true}
