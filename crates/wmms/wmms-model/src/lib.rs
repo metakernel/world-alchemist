@@ -1,14 +1,10 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub mod ids;
+pub mod aspects;
+pub mod attr;
+pub mod diff;
+pub mod entity;
+pub mod index;
+pub mod relations;
+pub mod view;
+pub mod effect;
+pub mod model;
