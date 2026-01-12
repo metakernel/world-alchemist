@@ -32,12 +32,12 @@ impl Model {
     }
 
     #[inline]
-    fn entity(&self, rid: EntityRid) -> Option<&EntityRecord> {
+    pub(crate) fn entity(&self, rid: EntityRid) -> Option<&EntityRecord> {
         self.entities.get(rid.0 as usize)
     }
 
     #[inline]
-    fn entity_mut(&mut self, rid: EntityRid) -> Option<&mut EntityRecord> {
+    pub(crate) fn entity_mut(&mut self, rid: EntityRid) -> Option<&mut EntityRecord> {
         self.entities.get_mut(rid.0 as usize)
     }
 
