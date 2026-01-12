@@ -2,6 +2,7 @@ use wmms_core::ids::{AttrKeyId, TraitId};
 
 use crate::{attr::EffectInstId, ids::EntityRid};
 
+#[derive(Debug,Clone,Default)]
 pub struct ModelDiff {
     pub spawned: Vec<EntityRid>,
     pub killed: Vec<EntityRid>,
@@ -17,18 +18,21 @@ pub struct ModelDiff {
     pub aspects_changed: Vec<EntityRid>,
     
 }
+impl ModelDiff {
 
-impl Default for ModelDiff {
-    fn default() -> Self {
-        Self {
-            spawned: Vec::new(),
-            killed: Vec::new(),
-            trait_added: Vec::new(),
-            trait_removed: Vec::new(),
-            attr_changed: Vec::new(),
-            effect_added: Vec::new(),
-            effect_removed: Vec::new(),
-            aspects_changed: Vec::new(),
-        }
+    fn sort_dedup<T: Ord>(v: &mut Vec<T>) {
+        v.sort();
+        v.dedup();
+    }
+
+    pub fn canonicalize(&mut self) {
+        Self::sort_dedup(&mut self.spawned);
+        Self::sort_dedup(&mut self.killed);
+        Self::sort_dedup(&mut self.trait_added);
+        Self::sort_dedup(&mut self.trait_removed);
+        Self::sort_dedup(&mut self.attr_changed);
+        Self::sort_dedup(&mut self.effect_added);
+        Self::sort_dedup(&mut self.effect_removed);
+        Self::sort_dedup(&mut self.aspects_changed);
     }
 }

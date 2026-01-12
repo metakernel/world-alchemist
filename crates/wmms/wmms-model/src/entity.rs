@@ -11,9 +11,7 @@ pub struct EntityRecord {
     pub alive: bool,
 
     pub archetype: Option<ArchetypeId>,
-    
     pub traits: Vec<TraitId>,
-
     pub effects: Vec<EffectInstId>,
 
     pub aspects: AspectSet,
@@ -26,14 +24,15 @@ pub struct EntityAttrs {
 }
 
 impl EntityAttrs {
+    #[inline]
     pub fn stack(&self, key: &AttrKeyId) -> Option<&AttrStack> {
         self.stacks.get(key)
     }
-
+    #[inline]
     pub fn stack_mut(&mut self, key: &AttrKeyId) -> Option<&mut AttrStack> {
         self.stacks.get_mut(key)
     }
-
+    #[inline]
     pub fn insert(&mut self, key: AttrKeyId, stack: AttrStack) {
         self.stacks.insert(key, stack);
     }
@@ -47,8 +46,12 @@ pub struct EntityRunIdGen{
 
 impl EntityRunIdGen {
     pub fn new(session_seed: u64) -> Self {
-        Self {session_seed, next_counter: 0 }
+        Self {
+            session_seed,
+             next_counter: 1
+        }
     }
+    
     #[inline]
     pub fn alloc(&mut self) -> EntityRunId {
         let id = EntityRunId::from_seed_counter(self.session_seed, self.next_counter);

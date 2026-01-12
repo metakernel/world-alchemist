@@ -11,7 +11,7 @@ pub trait ModelView {
     fn aspects(&self, rid: EntityRid) -> &AspectSet;
     fn matches(&self, rid: EntityRid, q: &AspectQuery) -> bool;
 
-    fn get_attr(&self, key: AttrKeyId) -> Option<&AttrValue>;
+    fn get_attr(&self, rid: EntityRid, key: AttrKeyId) -> Option<&AttrValue>;
     fn explain_attr(&self, rid: EntityRid, key: AttrKeyId) -> Option<&[AttrLayer]>;
 
     fn has_trait(&self, rid: EntityRid, t: TraitId) -> bool;

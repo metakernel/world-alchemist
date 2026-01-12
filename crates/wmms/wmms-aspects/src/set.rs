@@ -1,7 +1,7 @@
 use alloc::vec::Vec;
 use crate::registry::{AspectRid};
 
-#[derive(Clone,Debug,Default)]
+#[derive(Clone,Debug,Default, PartialEq)]
 pub struct AspectSet{
     rids: Vec<AspectRid>,
 }
