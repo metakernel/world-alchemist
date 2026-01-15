@@ -3,10 +3,10 @@ use std::{fmt::{Display, Formatter}, ops::{ Shr, BitAnd}};
 use crate::hash::{Hash128, Hash64, hash_str128, hash_str64};
 
 #[cfg(feature = "id64")]
-pub type IdType = u64;
+pub type IdSize = u64;
 
 #[cfg(feature = "id128")]
-pub type IdType = u128;
+pub type IdSize = u128;
 
 #[cfg(feature = "id64")]
 pub type IdHash = Hash64;
@@ -47,44 +47,44 @@ macro_rules! define_id {
                 IdHash::from(hash)
             }
 
-            pub fn as_type(&self) -> $crate::ids::IdType {
+            pub fn as_idsize(&self) -> $crate::ids::IdSize {
                 #[cfg(feature = "id64")]
                 {
-                    self.0.as_u64() as $crate::ids::IdType
+                    self.0.as_u64() as $crate::ids::IdSize
                 }
                 #[cfg(feature = "id128")]
                 {
-                    self.0.as_u128() as $crate::ids::IdType
+                    self.0.as_u128() as $crate::ids::IdSize
                 }
             }
 
             pub fn as_u128(&self) -> u128 {
-                self.as_type() as u128
+                self.as_idsize() as u128
             }
 
             pub fn as_u64(&self) -> u64 {
-                self.as_type() as u64
+                self.as_idsize() as u64
             }
 
             pub fn as_u32(&self) -> u32 {
-                self.as_type() as u32
+                self.as_idsize() as u32
             }
 
             pub fn as_usize(&self) -> usize {
-                self.as_type() as usize
+                self.as_idsize() as usize
             }
         }
 
         impl From<u128> for  $name {
             fn from(v: u128) -> Self {
-                $name($crate::ids::IdHash::new(v as IdType))
+                $name($crate::ids::IdHash::new(v as IdSize))
             }
     
         }
 
         impl From<u64> for  $name {
             fn from(v: u64) -> Self {
-                $name($crate::ids::IdHash::new(v as IdType))
+                $name($crate::ids::IdHash::new(v as IdSize))
             }
     
         }
@@ -116,7 +116,7 @@ define_id!(EntityRid,"entity_rid"); // entity runtime ID
 impl EntityInstId {
     #[inline]
       pub fn from_seed_counter(session_seed: u64, counter: u64) -> Self {
-        let v = ((session_seed as IdType) << 64) | (counter as IdType);
+        let v = ((session_seed as IdSize) << 64) | (counter as IdSize);
         EntityInstId::from(v)
     }
 
