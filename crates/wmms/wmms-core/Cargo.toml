@@ -5,6 +5,11 @@ version.workspace = true
 authors.workspace = true
 license.workspace = true
 
+[features]
+default = ["id64"]
+id64 = []
+id128 = []
+
 [dependencies]
 thiserror = {workspace = true}
 miette = {workspace = true}
