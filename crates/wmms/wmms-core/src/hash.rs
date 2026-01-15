@@ -3,9 +3,31 @@
 #[derive(Clone,Copy,Debug,PartialEq,Eq,PartialOrd,Ord,Hash)]
 pub struct Hash128(u128);
 
+impl Hash128 {
+    pub fn new(v: u128) -> Self {
+        Hash128(v)
+    }
+
+    pub fn as_u128(&self) -> u128 {
+        self.0
+    }
+    
+}
+
 #[repr(transparent)]
 #[derive(Clone,Copy,Debug,PartialEq,Eq,PartialOrd,Ord,Hash)]
 pub struct Hash64(u64);
+
+impl Hash64 {
+    pub fn new(v: u64) -> Self {
+        Hash64(v)
+    }
+
+    pub fn as_u64(&self) -> u64 {
+        self.0
+    }
+    
+}
 
 pub fn hash128(data: &[u8]) -> Hash128 {
     let hash = blake3::hash(data);

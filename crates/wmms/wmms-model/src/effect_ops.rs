@@ -1,8 +1,8 @@
 
 use wmms_aspects::registry::AspectRid;
-use wmms_core::{ids::{AttrKeyId, EffectId, TraitId}, time::Tick};
+use wmms_core::{ids::{AttrKeyId, EffectId, EffectInstId, EntityRid, TraitId}, time::Tick};
 
-use crate::{attr::{AttrLayer, AttrValue, EffectInstId, LayerKind, LayerSource, LayerStamp}, effect::EffectInstance, ids::EntityRid, model::Model};
+use crate::{attr::{AttrLayer, AttrValue, LayerKind, LayerSource, LayerStamp}, effect::EffectInstance, model::Model};
 
 #[derive(Clone, Debug)]
 pub struct AttrLayerSpec {

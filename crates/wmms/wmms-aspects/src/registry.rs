@@ -6,8 +6,7 @@ use wmms_core::hash::hash_str128;
 use wmms_core::prelude::*;
 
 use crate::error::{AspectError, AspectResult};
-use crate::path::{self, AspectPath};
-use crate::registry;
+use crate::path::AspectPath;
 use crate::set::AspectSet;
 
 #[repr(transparent)]
@@ -75,7 +74,7 @@ impl AspectRegistryBuilder{
 
         for(i, (key,_)) in self.keys.iter().enumerate() {
             let rid = AspectRid(i as u32);
-            let id = AspectId::derive(key.as_str()); // Stable hash from canonical path
+            let id = AspectId::new(key.as_str()); // Stable hash from canonical path
             nodes.push(AspectNode {
                 rid, id,
                 key: key.clone(),
@@ -89,7 +88,7 @@ impl AspectRegistryBuilder{
 
         // Set up parent/child relationships and depths
         for idx in 0..nodes.len() {
-            let key = nodes[idx].key.clone();
+            let _key = nodes[idx].key.clone();
             let ap = AspectPath::parse(nodes[idx].key.as_str())?;
             if let Some(parent) = ap.parent(){
                 let parent_rid = *by_key.get(parent.key())

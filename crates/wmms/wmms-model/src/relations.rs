@@ -1,7 +1,7 @@
-use wmms_core::ids::{Id128, RelationId};
+use wmms_core::ids::{ RelationId};
 
-use crate::ids::EntityRunId;
+use wmms_core::ids::EntityInstId;
 
 pub struct Relation {
-    pub out_edges: Vec<Vec<(RelationId,EntityRunId)>>,
+    pub out_edges: Vec<Vec<(RelationId,EntityInstId)>>,
 }

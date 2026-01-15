@@ -1,6 +1,4 @@
-use wmms_core::{ids::EffectId, time::Tick};
-
-use crate::{attr::EffectInstId, ids::EntityRid};
+use wmms_core::{ids::{EffectId, EffectInstId, EntityRid}, time::Tick};
 
 #[derive(Clone,Debug)]
 pub struct EffectInstance {

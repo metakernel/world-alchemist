@@ -16,3 +16,5 @@ debian/*
 # Added by cargo
 
 /target
+
+*.rcgu.o

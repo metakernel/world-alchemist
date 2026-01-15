@@ -1,6 +1,6 @@
 use wmms_core::ids::{AttrKeyId, TraitId};
 
-use crate::{attr::EffectInstId, ids::EntityRid};
+use wmms_core::{ids::EffectInstId, ids::EntityRid};
 
 #[derive(Debug,Clone,Default)]
 pub struct ModelDiff {

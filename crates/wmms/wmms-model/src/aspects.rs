@@ -1,4 +1,4 @@
-use wmms_aspects::{registry::{ AspectRegistry, AspectRid}, set::AspectSet};
+use wmms_aspects::set::AspectSet;
 
 #[derive(Default,Debug)]
 pub struct EntityAspects {

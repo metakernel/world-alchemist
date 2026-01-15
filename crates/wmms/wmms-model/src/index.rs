@@ -1,7 +1,7 @@
 use roaring::RoaringBitmap;
 use wmms_aspects::registry::AspectRid;
 
-use crate::ids::EntityRid;
+use wmms_core::ids::EntityRid;
 
 pub struct AspectIndex {
     by_aspect: Vec<RoaringBitmap>,
@@ -14,19 +14,19 @@ impl AspectIndex {
 
     pub fn insert(&mut self, entity: EntityRid, aspect: AspectRid) {
         if let Some(bitmap) = self.by_aspect.get_mut(aspect.0 as usize) {
-            bitmap.insert(entity.0 as u32);
+            bitmap.insert(entity.as_u32());
         }
     }
 
     pub fn remove(&mut self, entity: EntityRid, aspect: AspectRid) {
         if let Some(bitmap) = self.by_aspect.get_mut(aspect.0 as usize) {
-            bitmap.remove(entity.0 as u32);
+            bitmap.remove(entity.as_u32());
         }
     }
 
     pub fn has_aspect(&self, entity: EntityRid, aspect: AspectRid) -> bool {
         if let Some(bitmap) = self.by_aspect.get(aspect.0 as usize) {
-            bitmap.contains(entity.0 as u32)
+            bitmap.contains(entity.as_u32())
         } else {
             false
         }

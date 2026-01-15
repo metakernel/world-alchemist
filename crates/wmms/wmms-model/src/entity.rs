@@ -1,8 +1,8 @@
 use std::collections::BTreeMap;
 use wmms_aspects::set::AspectSet;
-use wmms_core::{ids::{ArchetypeId, AttrKeyId, EffectId, TraitId}, time::Tick};
+use wmms_core::ids::{ArchetypeId, AttrKeyId, EffectInstId, EntityId, EntityInstId, EntityRid, TraitId};
 
-use crate::{attr::{AttrStack, EffectInstId}, ids::{EntityId, EntityRid, EntityRunId}};
+use crate::{attr::{AttrStack}};
 
 #[derive(Debug)]
 pub struct EntityRecord {
@@ -53,8 +53,8 @@ impl EntityRunIdGen {
     }
     
     #[inline]
-    pub fn alloc(&mut self) -> EntityRunId {
-        let id = EntityRunId::from_seed_counter(self.session_seed, self.next_counter);
+    pub fn alloc(&mut self) -> EntityInstId {
+        let id = EntityInstId::from_seed_counter(self.session_seed, self.next_counter);
         self.next_counter += 1;
         id
     }

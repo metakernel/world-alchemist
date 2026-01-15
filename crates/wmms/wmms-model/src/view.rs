@@ -1,7 +1,7 @@
 use wmms_aspects::{query::AspectQuery, set::AspectSet};
-use wmms_core::ids::{AttrKeyId, TraitId};
+use wmms_core::ids::{AttrKeyId, TraitId,EntityId, EntityRid};
 
-use crate::{attr::{AttrLayer, AttrValue}, ids::{EntityId, EntityRid}};
+use crate::{attr::{AttrLayer, AttrValue}};
 
 pub trait ModelView {
     fn has_entity(&self, id: EntityId) -> bool;

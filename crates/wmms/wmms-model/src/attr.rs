@@ -1,6 +1,6 @@
-use wmms_core::{ids::{AbilityId, ArchetypeId, EffectId, TraitId}, num::Q16_16, time::Tick};
+use wmms_core::{ids::{AbilityId, ArchetypeId, EffectId, EffectInstId, TraitId}, num::Q16_16, time::Tick};
 
-use crate::ids::EntityId;
+use wmms_core::ids::EntityId;
 
 
 #[derive(Clone,PartialEq,Debug)]
@@ -36,10 +36,6 @@ pub enum LayerSource {
     System(u64),
     
 }
-
-#[repr(transparent)]
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
-pub struct EffectInstId(pub u64);
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 pub struct LayerStamp {

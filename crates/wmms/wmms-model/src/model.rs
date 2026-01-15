@@ -1,9 +1,9 @@
 use std::{collections::BTreeMap, sync::Arc};
 
 use wmms_aspects::{registry::{AspectRegistry, AspectRid}, set::AspectSet};
-use wmms_core::{ids::{AttrKeyId, TraitId}, time::Tick};
+use wmms_core::{ids::{AttrKeyId, EffectInstId, EntityId, EntityRid, TraitId}, time::Tick};
 
-use crate::{attr::{AttrLayer, AttrStack, AttrValue, EffectInstId}, diff::ModelDiff, effect::EffectInstance, entity::EntityRecord, ids::{EntityId, EntityRid}, index::AspectIndex, view::ModelView};
+use crate::{attr::{AttrLayer, AttrStack, AttrValue}, diff::ModelDiff, effect::EffectInstance, entity::EntityRecord, index::AspectIndex, view::ModelView};
 
 pub struct Model {
     pub aspects_reg: Arc<AspectRegistry>,
@@ -33,12 +33,12 @@ impl Model {
 
     #[inline]
     pub(crate) fn entity(&self, rid: EntityRid) -> Option<&EntityRecord> {
-        self.entities.get(rid.0 as usize)
+        self.entities.get(rid.as_usize())
     }
 
     #[inline]
     pub(crate) fn entity_mut(&mut self, rid: EntityRid) -> Option<&mut EntityRecord> {
-        self.entities.get_mut(rid.0 as usize)
+        self.entities.get_mut(rid.as_usize())
     }
 
     pub fn spawn_entity(&mut self, id: EntityId) -> EntityRid {
@@ -47,7 +47,7 @@ impl Model {
             return existing;
         }
 
-        let rid = EntityRid(self.entities.len() as u32);
+        let rid = EntityRid::from(self.entities.len() as u64);
         let record = EntityRecord {
             id,
             rid,
@@ -200,7 +200,7 @@ impl Model {
                 continue;
             }
 
-            let rid = EntityRid(i as u32);
+            let rid = EntityRid::from(i as u64);
 
             for (key, stack) in entity.attrs.stacks.iter_mut() {
                 stack.purge_expired(now);
@@ -215,7 +215,7 @@ impl Model {
 
     // Effects instances
     pub fn alloc_effect_inst(&mut self) -> EffectInstId {
-        let id = EffectInstId(self.next_effect_inst);
+        let id = EffectInstId::from(self.next_effect_inst);
         self.next_effect_inst += 1;
         id
     }

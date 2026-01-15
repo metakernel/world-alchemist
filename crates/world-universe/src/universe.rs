@@ -1,5 +1,4 @@
 
-use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
@@ -23,11 +22,11 @@ impl UniverseManifest {
             default_scope: None,
         }
     }
-    pub fn load(path: &WorldRoot) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn load(_path: &WorldRoot) -> Result<Self, Box<dyn std::error::Error>> {
         // Placeholder for loading logic
         Ok(Self::new("DefaultUniverse", None))
     }
-    pub fn save(&self, root: WorldRoot) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn save(&self, _root: WorldRoot) -> Result<(), Box<dyn std::error::Error>> {
         // Placeholder for saving logic
         Ok(())
     }

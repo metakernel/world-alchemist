@@ -16,12 +16,12 @@ impl SessionManager {
         Ok(())
     }
 
-    pub fn save(name: &str, bytes: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn save(_name: &str, _bytes: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
         // TODO: Implement session saving
         Ok(())
     }
 
-    pub fn load(name: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    pub fn load(_name: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
         // ToDO: Implement session loading
         Ok(Vec::new())
     }

@@ -1,8 +1,6 @@
-use alloc::string::{String, ToString};
-use alloc::vec::Vec;
 use wmms_core::canon::CanonicalKey;
 
-use crate::error::{AspectError, AspectResult};
+use crate::error::AspectResult;
 
 #[derive(Clone,Debug,PartialEq,Eq,Hash, PartialOrd, Ord)]
 pub struct AspectPath(CanonicalKey);
